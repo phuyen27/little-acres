@@ -60,23 +60,28 @@ function mkA(t, f, p, g) {
 }
 
 function snap() {
-    return JSON.stringify({
-        v: 2,
-        co: coins,
-        z: Z.map(z => ({
-            pl: z.pl,
-            u: z.u,
-            an: z.an.map(a => ({t:a.t,f:a.f,p:a.p}))
-        })),
-        zu,
-        zi,
-        kv,
-        stf: STF.map(w => ({k:w.k,z:w.z})),
-        inv,
-        tm,
-        sel,
-        tool
-    });
+  return JSON.stringify({
+    v: 2,
+    co: coins,
+    z: Z.map(z => ({
+      pl: z.pl,
+      u: z.u,
+      an: z.an.map(a => ({
+        t: a.t,
+        f: a.f,
+        p: a.p,
+        g: a.g
+      }))
+    })),
+    zu,
+    zi,
+    kv,
+    stf: STF.map(w => ({ k: w.k, z: w.z })),
+    inv,
+    tm,
+    sel,
+    tool
+  });
 }
 
 function load(s) {
@@ -89,25 +94,28 @@ function load(s) {
 
     if (o.v == 1) {
         Z[0].pl = o.pl;
-        Z[0].u = o.u;
+        Z[0].u  = o.u;
         Z[0].an = o.an.map(a => mkA(a.t, a.f, a.p));
     } else {
         o.z.forEach((z, i) => {
             Z[i].pl = z.pl;
-            Z[i].u = z.u;
-            Z[i].an = z.an.map(a => mkA(a.t, a.f, a.p));
+            Z[i].u  = z.u;
+            Z[i].an = z.an.map(a => mkA(a.t, a.f, a.p, a.g));
         });
 
         zu = o.zu;
     }
 
     setZ(o.v == 2 ? o.zi : 0);
+
     STF = (o.stf || []).map(s => mkW(s.k, s.z));
-    kv = o.kv || 0;
-    inv = o.inv;
-    tm = o.tm;
-    sel = o.sel;
+
+    kv   = o.kv || 0;
+    inv  = o.inv;
+    tm   = o.tm;
+    sel  = o.sel;
     tool = o.tool;
+
     weather = 0;
     wt = 60;
 }
