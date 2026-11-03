@@ -1,123 +1,124 @@
-/* ===== DOM & CANVAS ===== */
+/* ===== GAME STATE ===== */
 
 const $ = id => document.getElementById(id);
-
 const cv = $('cv');
 const c = cv.getContext('2d');
 
-/* ===== GAME STATE ===== */
-
-let coins, plots, u, animals, inv;
+let STF, Z, zu, coins, plots, u, animals, inv;
 let tm, sel, tool, weather, wt;
-let paused = false;
-let at = 0;
-let pend = 0;
-let fT = 0;
-let sT = 0;
-let sPg = 0;
-let aPg = 0;
-let rain = [];
+let paused = false, at = 0, pend = 0;
+let fT = 0, sT = 0, sPg = 0, aPg = 0, rain = [];
 
-/* ===== INITIAL STATE ===== */
+function newZ(i) {
+    return {
+        pl: Array.from({length:48}, () => ({t:0,c:-1,g:0,w:0})),
+        u: Array.from({length:48}, (_,j) => j % 8 < 4 && Math.floor(j / 8) < 3),
+        an: [],
+        gh: i == 3
+    };
+}
+
+function setZ(i) {
+    zi = i;
+    plots = Z[i].pl;
+    u = Z[i].u;
+    animals = Z[i].an;
+}
 
 function fresh() {
-  coins = 40;
+    coins = 40;
+    Z = [0,1,2,3].map(newZ);
+    zu = [1,0,0,0];
+    STF = [];
+    CL.clear();
+    setZ(0);
 
-  plots = Array.from(
-    { length: 48 },
-    () => ({ t: 0, c: -1, g: 0, w: 0 })
-  );
-
-  u = Array.from(
-    { length: 48 },
-    (_, i) => i % 8 < 4 && Math.floor(i / 8) < 3
-  );
-
-  animals = [];
-  inv = {};
-
-  tm = 20;
-  sel = 0;
-  tool = 0;
-  weather = 0;
-  wt = 60;
+    inv = {};
+    tm = 20;
+    sel = 0;
+    tool = 0;
+    weather = 0;
+    wt = 60;
 }
-
-/* ===== ANIMAL ===== */
 
 function mkA(t, f, p) {
-  return {
-    t,
-    f: f ?? 100,
-    p: p ?? 0,
-    x: PX0 + Math.random() * 100,
-    y: PY0 + Math.random() * 60,
-    tx: 0,
-    ty: 0,
-    d: 1,
-    mv: 0,
-    wait: Math.random() * 3
-  };
+    return {
+        t,
+        f: f ?? 100,
+        p: p ?? 0,
+        x: PX0 + Math.random() * 100,
+        y: PY0 + Math.random() * 60,
+        tx: PX0 + Math.random() * 100,
+        ty: PY0 + Math.random() * 60,
+        d: 1,
+        mv: 0,
+        wait: Math.random() * 3
+    };
 }
-
-/* ===== SAVE DATA ===== */
 
 function snap() {
-  return JSON.stringify({
-    v: 1,
-    co: coins,
-    pl: plots,
-    u,
-    an: animals.map(a => ({
-      t: a.t,
-      f: a.f,
-      p: a.p
-    })),
-    inv,
-    tm,
-    sel,
-    tool
-  });
+    return JSON.stringify({
+        v: 2,
+        co: coins,
+        z: Z.map(z => ({
+            pl: z.pl,
+            u: z.u,
+            an: z.an.map(a => ({t:a.t,f:a.f,p:a.p}))
+        })),
+        zu,
+        zi,
+        stf: STF.map(w => ({k:w.k,z:w.z})),
+        inv,
+        tm,
+        sel,
+        tool
+    });
 }
-
-/* ===== LOAD DATA ===== */
 
 function load(s) {
-  const o = JSON.parse(s);
+    const o = JSON.parse(s);
 
-  if (o.v !== 1) throw 0;
+    if (!(o.v >= 1 && o.v <= 2)) throw 0;
 
-  coins = o.co;
-  plots = o.pl;
-  u = o.u;
+    fresh();
+    coins = o.co;
 
-  animals = o.an.map(a => mkA(a.t, a.f, a.p));
+    if (o.v == 1) {
+        Z[0].pl = o.pl;
+        Z[0].u = o.u;
+        Z[0].an = o.an.map(a => mkA(a.t, a.f, a.p));
+    } else {
+        o.z.forEach((z, i) => {
+            Z[i].pl = z.pl;
+            Z[i].u = z.u;
+            Z[i].an = z.an.map(a => mkA(a.t, a.f, a.p));
+        });
 
-  inv = o.inv;
-  tm = o.tm;
-  sel = o.sel;
-  tool = o.tool;
+        zu = o.zu;
+    }
 
-  weather = 0;
-  wt = 60;
+    setZ(o.v == 2 ? o.zi : 0);
+    STF = (o.stf || []).map(s => mkW(s.k, s.z));
+
+    inv = o.inv;
+    tm = o.tm;
+    sel = o.sel;
+    tool = o.tool;
+    weather = 0;
+    wt = 60;
 }
-
-/* ===== LOCAL STORAGE ===== */
 
 function save() {
-  try {
-    localStorage.setItem('nongtrai1', snap());
-  } catch (e) {}
+    try {
+        localStorage.setItem('nongtrai1', snap());
+    } catch (e) {}
 }
-
-/* ===== LOAD PREVIOUS PROGRESS ===== */
 
 fresh();
 
 try {
-  const s = localStorage.getItem('nongtrai1');
-
-  if (s) load(s);
+    const s = localStorage.getItem('nongtrai1');
+    if (s) load(s);
 } catch (e) {
-  fresh();
+    fresh();
 }
