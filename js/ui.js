@@ -78,13 +78,14 @@ function renderShops() {
 
     row(
         $('sd'),
-        CROPS,
+        CROPS.filter(o => !!o.tr == (zi == 1)),
         sPg,
         p => {
             sPg = p;
             renderShops();
         },
-        (o, i) => {
+        (o, j) => {
+            const i = o.id;
             const b = mkBtn('b' + (sel == i && tool == 1 ? ' on' : ''));
 
             b.title = o.n;
@@ -145,10 +146,217 @@ function hud() {
     $('nx').textContent = 'Ô tiếp theo: ' + nextCost() + ' xu';
 
     const [n, t] = invVal();
-    $('iv').textContent = 'Kho: ' + n + ' (' + t + ' xu)';
+    $('iv').textContent = 'Kho: ' + n + '/' + cap() + ' (' + t + ' xu)';
 }
 
-$('sell').onclick = sellAll;
+/* ===== POND AND MUD POSITIONS ===== */
+
+function pond() {
+    return {
+        x: PX1 - 36,
+        y: PY0 + 6,
+        w: 36,
+        h: 26
+    };
+}
+
+function mud() {
+    return {
+        x: PX0 + 6,
+        y: PY1 - 12,
+        w: 24,
+        h: 12
+    };
+}
+
+/* ===== ANIMAL MOVEMENT ===== */
+
+function pickT(a, A) {
+    const m = A.m;
+    const r = Math.random();
+
+    a.tx = PX0 + Math.random() * (PX1 - PX0 - A.w);
+    a.ty = PY0 + Math.random() * (PY1 - PY0);
+
+    if (zi == 0) {
+        const P = pond();
+        const M = mud();
+
+        if (m == 'swim' && r < .6) {
+            a.tx = P.x + Math.random() * (P.w - A.w);
+            a.ty = P.y + 4 + Math.random() * (P.h - 8);
+        } else if (m == 'mud' && r < .5) {
+            a.tx = M.x + Math.random() * (M.w - A.w);
+            a.ty = M.y + Math.random() * (M.h - 4);
+        }
+    }
+}
+
+/* ===== ANIMAL SPRITE RENDERING ===== */
+
+function drawA(a, A, bob) {
+    const m = A.m;
+    const P = pond();
+    const M = mud();
+
+    let x = a.x;
+    let y = a.y;
+    let S = A.S;
+
+    const inW =
+        zi == 0 &&
+        m == 'swim' &&
+        a.x + A.w / 2 > P.x &&
+        a.x < P.x + P.w &&
+        a.y > P.y &&
+        a.y < P.y + P.h;
+
+    const inM =
+        zi == 0 &&
+        m == 'mud' &&
+        a.x + A.w / 2 > M.x &&
+        a.x < M.x + M.w &&
+        a.y > M.y - 2 &&
+        a.y < M.y + M.h;
+
+    if (m == 'hop' && a.mv) {
+        y -= Math.abs(Math.sin(at * 9 + a.ph)) * 4;
+    } else if (m == 'fly') {
+        y -= 6 + Math.sin(at * 5 + a.ph) * 2;
+    } else if (m == 'peck' && a.wait > 0 && !a.mv) {
+        y += Math.sin(at * 10 + a.ph) > .3 ? 1 : 0;
+    } else if (m == 'graze' && a.wait > 0 && !a.mv) {
+        y += 1;
+    }
+
+    if (m != 'fish' && m != 'dart' && !inW) {
+        c.fillStyle = 'rgba(0,0,0,.2)';
+        c.fillRect(x + 1, a.y + S.length, A.w - 2, 1);
+    }
+
+    if (inW) S = S.slice(0, S.length - 2);
+
+    if (inM) {
+        S = S.slice(0, S.length - 1);
+        y += 1;
+    }
+
+    spr(c, S, PAL, x, y - (m == 'hop' || m == 'fly' ? 0 : bob), a.d < 0);
+
+    if (inW) {
+        c.fillStyle = 'rgba(255,255,255,.6)';
+        c.fillRect(x - 1, a.y + S.length - 1, A.w + 2, 1);
+    }
+
+    if (inM) {
+        c.fillStyle = '#6e4520';
+        c.fillRect(x + 1, y + S.length - 1, A.w - 2, 1);
+    }
+
+    if (m == 'fly') {
+        const o = Math.floor(at * 20) % 2;
+
+        c.fillStyle = 'rgba(255,255,255,.85)';
+        c.fillRect(x + 1 + o, y - 2, 2, 1);
+        c.fillRect(x + 3 - o, y - 2, 2, 1);
+    }
+}
+
+/* ===== INVENTORY MANAGEMENT ===== */
+
+$('sell').onclick = () => {
+    renderInv();
+    $('kp').style.display = 'flex';
+};
+
+$('kx').onclick = () => {
+    $('kp').style.display = 'none';
+};
+
+$('ks').onclick = () => {
+    sellAll();
+    renderInv();
+};
+
+$('ku').onclick = () => {
+    const k = upC();
+
+    if (coins < k) {
+        toast('Cần ' + k + ' xu để nâng cấp kho', 1);
+        return;
+    }
+
+    coins -= k;
+    kv++;
+
+    toast('Kho đã nâng lên ' + cap() + ' chỗ');
+    renderInv();
+};
+
+function sellK(k, n) {
+    n = Math.min(n, inv[k] || 0);
+
+    if (n <= 0) return;
+
+    const t = n * unit(k);
+
+    coins += t;
+    pend += t;
+    inv[k] -= n;
+
+    if (inv[k] <= 0) delete inv[k];
+
+    toast('Đã bán ' + n + ' ' + nm(k).toLowerCase() + ' (+' + t + ' xu)');
+    renderInv();
+}
+
+function renderInv() {
+    const l = $('kr');
+    l.innerHTML = '';
+
+    const ks = Object.keys(inv).filter(k => inv[k] > 0);
+
+    $('kh').textContent = 'Kho ' + cnt() + '/' + cap();
+
+    if (!ks.length) {
+        l.textContent = 'Kho đang trống';
+    }
+
+    ks.forEach(k => {
+        const i = +k.slice(1);
+        const r = document.createElement('div');
+
+        r.className = 'ir';
+
+        r.append(portrait(g => {
+            if (k[0] == 'c') {
+                spr(g, CS[i] || RIPE[CROPS[i].k], cropPal(i), 4, 4);
+            } else {
+                g.fillStyle = '#1a1020';
+                g.fillRect(4, 5, 8, 7);
+
+                g.fillStyle = ANI[i].col;
+                g.fillRect(5, 6, 6, 5);
+            }
+        }));
+
+        const s = document.createElement('span');
+        s.textContent = nm(k) + ' ×' + inv[k] + ' (' + unit(k) + ' xu/cái)';
+
+        r.append(s);
+
+        const a = mkBtn('b s', 'Bán 1');
+        const b = mkBtn('b s', 'Bán hết');
+
+        a.onclick = () => sellK(k, 1);
+        b.onclick = () => sellK(k, inv[k]);
+
+        r.append(a, b);
+        l.append(r);
+    });
+
+    $('ku').textContent = 'Nâng kho +20 (' + upC() + ' xu)';
+}
 
 /* ===== STAFF MANAGEMENT ===== */
 
@@ -315,7 +523,6 @@ function renderStaff() {
         const b = mkBtn('b');
 
         b.title = 'Thuê ' + o.n;
-
         b.append(
             portrait(g => spr(g, WK, PAL2[k], 4, 3)),
             p + ' xu (' + n + ')'
@@ -367,6 +574,9 @@ function renderZones() {
 
             setZ(i);
             aPg = 0;
+            sPg = 0;
+            sel = CROPS.findIndex(c => !!c.tr == (i == 1));
+
             renderShops();
             $('zp').style.display = 'none';
         };
