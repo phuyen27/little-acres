@@ -4,7 +4,7 @@ const $ = id => document.getElementById(id);
 const cv = $('cv');
 const c = cv.getContext('2d');
 
-let STF, Z, zu, coins, plots, u, animals, inv;
+let kv = 0, STF, Z, zu, coins, plots, u, animals, inv;
 let tm, sel, tool, weather, wt;
 let paused = false, at = 0, pend = 0;
 let fT = 0, sT = 0, sPg = 0, aPg = 0, rain = [];
@@ -30,6 +30,7 @@ function fresh() {
     Z = [0,1,2,3].map(newZ);
     zu = [1,0,0,0];
     STF = [];
+    kv = 0;
     CL.clear();
     setZ(0);
 
@@ -52,6 +53,7 @@ function mkA(t, f, p) {
         ty: PY0 + Math.random() * 60,
         d: 1,
         mv: 0,
+        ph: Math.random() * 6,
         wait: Math.random() * 3
     };
 }
@@ -67,6 +69,7 @@ function snap() {
         })),
         zu,
         zi,
+        kv,
         stf: STF.map(w => ({k:w.k,z:w.z})),
         inv,
         tm,
@@ -99,7 +102,7 @@ function load(s) {
 
     setZ(o.v == 2 ? o.zi : 0);
     STF = (o.stf || []).map(s => mkW(s.k, s.z));
-
+    kv = o.kv || 0;
     inv = o.inv;
     tm = o.tm;
     sel = o.sel;
