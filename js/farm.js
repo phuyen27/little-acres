@@ -109,6 +109,32 @@ function invVal() {
     return [n, t];
 }
 
+/* ===== INVENTORY CAPACITY ===== */
+
+function cap() {
+    return 30 + 20 * kv;
+}
+
+function upC() {
+    return Math.round(150 * Math.pow(1.6, kv));
+}
+
+function cnt() {
+    return Object.values(inv).reduce((a, b) => a + b, 0);
+}
+
+function unit(k) {
+    return k[0] == 'c'
+        ? CROPS[+k.slice(1)].s
+        : ANI[+k.slice(1)].s;
+}
+
+function nm(k) {
+    return k[0] == 'c'
+        ? CROPS[+k.slice(1)].n
+        : ANI[+k.slice(1)].r;
+}
+
 /* ===== FARM INTERACTIONS ===== */
 
 function act(mx, my) {
@@ -121,7 +147,9 @@ function act(mx, my) {
             my >= a.y - 5 &&
             my < a.y + 8
         ) {
-            if (a.p >= A.t) {
+            if (a.p >= A.t && cnt() >= cap()) {
+                toast('Kho đầy! Hãy bán bớt hoặc nâng cấp kho', 1);
+            } else if (a.p >= A.t) {
                 inv['a' + a.t] = (inv['a' + a.t] || 0) + 1;
                 a.p = 0;
                 toast('Thu được ' + A.r + ' từ ' + A.n);
@@ -164,13 +192,22 @@ function act(mx, my) {
     }
 
     if (tool == 0) {
-        if (!p.t && p.c < 0) {
+        if (zi == 1) {
+            toast('Cây ăn quả trồng thẳng xuống đất, không cần cuốc', 1);
+        } else if (!p.t && p.c < 0) {
             p.t = 1;
         }
     } else if (tool == 1) {
-        if (p.t && p.c < 0) {
-            const o = CROPS[sel];
+        const o = CROPS[sel];
 
+        if (!!o.tr != (zi == 1)) {
+            toast(
+                o.tr
+                    ? 'Cây ăn quả chỉ trồng được ở Vườn cây ăn trái'
+                    : 'Khu này chỉ trồng cây ăn quả',
+                1
+            );
+        } else if ((o.tr || p.t) && p.c < 0) {
             if (coins >= o.p) {
                 coins -= o.p;
                 p.c = sel;
@@ -184,11 +221,21 @@ function act(mx, my) {
         if (p.c >= 0) p.w = 45;
     } else if (tool == 3) {
         if (p.c >= 0 && p.g >= CROPS[p.c].t) {
+            if (cnt() >= cap()) {
+                toast('Kho đầy! Hãy bán bớt hoặc nâng cấp kho', 1);
+                return;
+            }
+
             inv['c' + p.c] = (inv['c' + p.c] || 0) + 1;
             toast('Thu hoạch ' + CROPS[p.c].n.toLowerCase());
-            p.c = -1;
-            p.g = 0;
-            p.w = 0;
+
+            if (CROPS[p.c].tr) {
+                p.g = CROPS[p.c].t * .55;
+            } else {
+                p.c = -1;
+                p.g = 0;
+                p.w = 0;
+            }
         }
     }
 }
@@ -211,13 +258,21 @@ function update(dt) {
     if (wt <= 0) {
         weather = Math.random() < .3 ? 1 : 0;
         wt = 40 + Math.random() * 50;
-        toast(weather ? 'Trời bắt đầu mưa, cây được tưới' : 'Trời đã tạnh mưa', weather ? 0 : 0);
+
+        toast(
+            weather
+                ? 'Trời bắt đầu mưa, cây được tưới'
+                : 'Trời đã tạnh mưa',
+            weather ? 0 : 0
+        );
     }
 
     for (const z of Z) {
         for (const p of z.pl) {
             if (p.c >= 0) {
-                if (weather || z.gh) p.w = Math.max(p.w, 10);
+                if (weather || z.gh) {
+                    p.w = Math.max(p.w, 10);
+                }
 
                 if (p.w > 0) {
                     p.w -= dt;
@@ -247,7 +302,11 @@ function update(dt) {
         a.x = Math.min(Math.max(a.x, PX0), PX1 - A.w);
         a.y = Math.min(Math.max(a.y, PY0), PY1);
 
-        const sp = a.f > 0 ? 14 : 6;
+        const sp =
+            (A.v || 14) *
+            (a.f > 0 ? 1 : .45) *
+            (A.m == 'dart' ? (Math.sin(at * 3 + a.ph) > .3 ? 2 : .15) : 1);
+
         a.mv = 0;
 
         if (a.wait > 0) {
@@ -258,9 +317,11 @@ function update(dt) {
             const d = Math.hypot(dx, dy);
 
             if (d < 2) {
-                a.wait = 1 + Math.random() * 4;
-                a.tx = PX0 + Math.random() * (PX1 - PX0 - A.w);
-                a.ty = PY0 + Math.random() * (PY1 - PY0);
+                a.wait = (A.m == 'fish' || A.m == 'fly' || A.m == 'dart')
+                    ? .1
+                    : 1 + Math.random() * 4;
+
+                pickT(a, A);
             } else {
                 a.x += dx / d * sp * dt;
                 a.y += dy / d * sp * dt;
