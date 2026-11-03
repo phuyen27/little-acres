@@ -42,20 +42,21 @@ function fresh() {
     wt = 60;
 }
 
-function mkA(t, f, p) {
-    return {
-        t,
-        f: f ?? 100,
-        p: p ?? 0,
-        x: PX0 + Math.random() * 100,
-        y: PY0 + Math.random() * 60,
-        tx: PX0 + Math.random() * 100,
-        ty: PY0 + Math.random() * 60,
-        d: 1,
-        mv: 0,
-        ph: Math.random() * 6,
-        wait: Math.random() * 3
-    };
+function mkA(t, f, p, g) {
+  return {
+    t,
+    g: g ?? ANI[t].t * 2,
+    f: f ?? 100,
+    p: p ?? 0,
+    x: PX0 + Math.random() * 100,
+    y: PY0 + Math.random() * 60,
+    tx: PX0 + Math.random() * 100,
+    ty: PY0 + Math.random() * 60,
+    d: 1,
+    mv: 0,
+    ph: Math.random() * 6,
+    wait: Math.random() * 3
+  };
 }
 
 function snap() {
