@@ -1,12 +1,14 @@
-
-/* ===== GAME STATE ===== */
+/* ===== DOM & CANVAS ===== */
 
 const $ = id => document.getElementById(id);
+
 const cv = $('cv');
 const c = cv.getContext('2d');
 
-let coins, plots, u, animals, inv, tm;
-let sel, tool, weather, wt;
+/* ===== GAME STATE ===== */
+
+let coins, plots, u, animals, inv;
+let tm, sel, tool, weather, wt;
 let paused = false;
 let at = 0;
 let pend = 0;
@@ -16,26 +18,32 @@ let sPg = 0;
 let aPg = 0;
 let rain = [];
 
+/* ===== INITIAL STATE ===== */
+
 function fresh() {
   coins = 40;
+
   plots = Array.from(
-    {length: 48},
-    () => ({t: 0, c: -1, g: 0, w: 0})
+    { length: 48 },
+    () => ({ t: 0, c: -1, g: 0, w: 0 })
   );
 
   u = Array.from(
-    {length: 48},
+    { length: 48 },
     (_, i) => i % 8 < 4 && Math.floor(i / 8) < 3
   );
 
   animals = [];
   inv = {};
+
   tm = 20;
   sel = 0;
   tool = 0;
   weather = 0;
   wt = 60;
 }
+
+/* ===== ANIMAL ===== */
 
 function mkA(t, f, p) {
   return {
@@ -51,6 +59,8 @@ function mkA(t, f, p) {
     wait: Math.random() * 3
   };
 }
+
+/* ===== SAVE DATA ===== */
 
 function snap() {
   return JSON.stringify({
@@ -70,6 +80,8 @@ function snap() {
   });
 }
 
+/* ===== LOAD DATA ===== */
+
 function load(s) {
   const o = JSON.parse(s);
 
@@ -78,7 +90,9 @@ function load(s) {
   coins = o.co;
   plots = o.pl;
   u = o.u;
+
   animals = o.an.map(a => mkA(a.t, a.f, a.p));
+
   inv = o.inv;
   tm = o.tm;
   sel = o.sel;
@@ -88,18 +102,21 @@ function load(s) {
   wt = 60;
 }
 
+/* ===== LOCAL STORAGE ===== */
+
 function save() {
   try {
     localStorage.setItem('nongtrai1', snap());
   } catch (e) {}
 }
 
-/* ===== INITIALIZE ===== */
+/* ===== LOAD PREVIOUS PROGRESS ===== */
 
 fresh();
 
 try {
   const s = localStorage.getItem('nongtrai1');
+
   if (s) load(s);
 } catch (e) {
   fresh();
