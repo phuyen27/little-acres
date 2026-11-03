@@ -1,5 +1,4 @@
-
-/* ===== USER INTERFACE ===== */
+/* ===== UI HELPERS ===== */
 
 function icon(g, rows, pal, x, y) {
   spr(g, rows, pal, x, y);
@@ -63,13 +62,8 @@ function row(el, items, pg, set, mk) {
   const L = mkBtn('b s', '‹');
   const R = mkBtn('b s', '›');
 
-  L.onclick = () => {
-    set(pg <= 0 ? max : pg - 1);
-  };
-
-  R.onclick = () => {
-    set(pg >= max ? 0 : pg + 1);
-  };
+  L.onclick = () => set(pg <= 0 ? max : pg - 1);
+  R.onclick = () => set(pg >= max ? 0 : pg + 1);
 
   el.append(L);
 
@@ -166,11 +160,11 @@ function hud() {
   $('iv').textContent = 'Kho: ' + n + ' (' + t + ' xu)';
 }
 
-/* ===== BUTTON EVENTS ===== */
+/* ===== SELL ===== */
 
 $('sell').onclick = sellAll;
 
-/* Pause */
+/* ===== PAUSE ===== */
 
 $('bp').onclick = () => {
   paused = !paused;
@@ -179,7 +173,7 @@ $('bp').onclick = () => {
   $('bp').textContent = paused ? 'Tiếp tục' : 'Tạm dừng';
 };
 
-/* Reset */
+/* ===== RESET ===== */
 
 let rT;
 
@@ -213,7 +207,7 @@ $('br').onclick = () => {
   }
 };
 
-/* ===== BACKUP & RESTORE ===== */
+/* ===== BACKUP CHECKSUM ===== */
 
 const hs = s => {
   let h = 0;
@@ -225,6 +219,8 @@ const hs = s => {
   return h.toString(36);
 };
 
+/* ===== BACKUP ===== */
+
 let mT;
 
 $('bb').onclick = () => {
@@ -234,9 +230,13 @@ $('bb').onclick = () => {
   $('md').style.display = 'flex';
 };
 
+/* ===== CLOSE BACKUP ===== */
+
 $('mx').onclick = () => {
   $('md').style.display = 'none';
 };
+
+/* ===== COPY BACKUP ===== */
 
 $('mc').onclick = () => {
   $('bk').select();
@@ -249,6 +249,8 @@ $('mc').onclick = () => {
 
   toast('Đã sao chép mã sao lưu');
 };
+
+/* ===== RESTORE BACKUP ===== */
 
 $('mr').onclick = () => {
   const b = $('mr');
