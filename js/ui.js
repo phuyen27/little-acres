@@ -129,7 +129,7 @@ function renderShops() {
                     toast('Không đủ xu mua ' + o.n.toLowerCase(), 1);
                 } else {
                     coins -= o.p;
-                    animals.push(mkA(o.id));
+                    animals.push(mkA(o.id, 100, 0, 0));
                     toast('Đã mua một con ' + o.n.toLowerCase());
                 }
             };
