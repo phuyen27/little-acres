@@ -3,6 +3,8 @@
 
 A cozy pixel-art farming game.
 
+link:https://littacres.netlify.app/
+
 ## About
 
 Little Acres is a small farming game where players can grow crops, raise animals, collect products and build their own little farm.
