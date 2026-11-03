@@ -1,4 +1,3 @@
-
 /* ===== SAVE WHEN LEAVING PAGE ===== */
 
 document.addEventListener('visibilitychange', save);
