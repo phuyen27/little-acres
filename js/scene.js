@@ -1,10 +1,11 @@
-
-/* ===== SCENE DRAWING ===== */
+/* ===== SCENE COLORS ===== */
 
 const mix = (a, b, t) =>
   'rgb(' +
   a.map((v, i) => Math.round(v + (b[i] - v) * t)).join(',') +
   ')';
+
+/* ===== DRAW SCENE ===== */
 
 function draw() {
   const ph = (tm / 150) % 1;
@@ -74,7 +75,7 @@ function draw() {
     }
   }
 
-  /* Farm fence */
+  /* Fence */
 
   c.fillStyle = '#7a5a3a';
   c.fillRect(PX0 - 4, PY0 - 6, PX1 - PX0 + 16, 1);
@@ -144,7 +145,7 @@ function draw() {
     }
   }
 
-  /* Water pond */
+  /* Pond */
 
   c.fillStyle = '#3b7fc9';
   c.fillRect(20, 136, 50, 18);
@@ -201,12 +202,7 @@ function draw() {
       const bob = an.mv && f ? 1 : 0;
 
       c.fillStyle = 'rgba(0,0,0,.2)';
-      c.fillRect(
-        an.x + 1,
-        an.y + A.S.length,
-        A.w - 2,
-        1
-      );
+      c.fillRect(an.x + 1, an.y + A.S.length, A.w - 2, 1);
 
       spr(c, A.S, PAL, an.x, an.y - bob, an.d < 0);
 
