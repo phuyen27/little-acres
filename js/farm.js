@@ -255,7 +255,6 @@ cv.addEventListener('pointerdown', e => {
 });
 
 /* ===== GAME UPDATE ===== */
-
 function update(dt) {
     tm += dt;
     wt -= dt;
@@ -290,6 +289,7 @@ function update(dt) {
         }
     }
 
+    // Animal growth and product production
     for (const a of Z.flatMap(z => z.an)) {
         const A = ANI[a.t];
         const was = a.f > 0;
@@ -301,9 +301,18 @@ function update(dt) {
         }
 
         if (a.f > 0) {
-            a.p = Math.min(A.t, a.p + dt);
+            if (a.g < A.t * 2) {
+                a.g += dt;
+
+                if (a.g >= A.t * 2) {
+                    toast(A.n + ' đã trưởng thành!');
+                }
+            } else {
+                a.p = Math.min(A.t, a.p + dt);
+            }
         }
 
+        // Animal movement logic
         a.x = Math.min(Math.max(a.x, PX0), PX1 - A.w);
         a.y = Math.min(Math.max(a.y, PY0), PY1);
 
