@@ -23,37 +23,44 @@ body {
 
 #w {
   width: 100%;
-  max-width: 960px;
-  padding: 6px;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
 }
 
 #cw {
-  flex: 1;
-  min-height: 0;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
 }
 
 #pn {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
   display: flex;
   flex-wrap: wrap;
   gap: 0 14px;
   justify-content: center;
+  align-items: center;
+  padding: 6px 6px calc(4px + env(safe-area-inset-bottom, 0px));
+  background: repeating-linear-gradient(
+    90deg,
+    #6b4226 0 28px,
+    #5f3a21 28px 30px
+  );
+  border-top: 4px solid #1a1020;
+  box-shadow: inset 0 4px 0 #a9703f;
 }
 
 #cv {
+  position: fixed;
+  inset: 0;
+  width: 100%;
   height: 100%;
-  width: auto;
-  max-width: 100%;
-  aspect-ratio: 2/1;
+  pointer-events: auto;
   image-rendering: pixelated;
-  border: 4px solid #1a1020;
+  border: 0;
   display: block;
   background: #000;
   touch-action: manipulation;
@@ -103,9 +110,15 @@ body {
 }
 
 #hud {
-  justify-content: space-between;
-  margin-bottom: 2px;
-  font-size: 22px;
+  position: fixed;
+  top: env(safe-area-inset-top, 0px);
+  left: 0;
+  right: 0;
+  z-index: 4;
+  padding: 4px 8px;
+  font-size: 20px;
+  text-shadow: 2px 2px #1a1020;
+  background: linear-gradient(#1a1020cc, #1a102000);
 }
 
 .row {
@@ -114,7 +127,7 @@ body {
 
 #ts {
   position: fixed;
-  top: calc(8px + env(safe-area-inset-top, 0px));
+  top: calc(54px + env(safe-area-inset-top, 0px));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -126,8 +139,9 @@ body {
 
 .t {
   background: #2b1d2e;
-  border: 4px solid #f5c542;
-  padding: 4px 12px;
+  border: 3px solid #f5c542;
+  padding: 1px 8px;
+  font-size: 18px;
   animation: in .3s steps(5);
 }
 
@@ -171,7 +185,8 @@ body {
   letter-spacing: 6px;
 }
 
-#md {
+#md,
+#zp {
   position: fixed;
   inset: 0;
   background: rgba(10, 5, 20, .8);
@@ -182,7 +197,8 @@ body {
   padding: 12px;
 }
 
-#md > div {
+#md > div,
+#zp > div {
   background: #3a2740;
   border: 4px solid #1a1020;
   padding: 12px;
@@ -203,4 +219,56 @@ h4 {
   margin: 0 0 6px;
   font-weight: 400;
   font-size: 26px;
+}
+
+#zp {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 5, 20, .8);
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  padding: 12px;
+}
+
+#zl {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 6px;
+}
+
+#nv {
+  position: relative;
+  padding: 0 4px;
+}
+
+#nv canvas {
+  width: 24px;
+  height: 24px;
+}
+
+#nv:hover::after {
+  content: 'Chọn khu';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #2b1d2e;
+  border: 3px solid #f5c542;
+  padding: 0 6px;
+  white-space: nowrap;
+  z-index: 6;
+}
+
+#sd .b,
+#an .b {
+  background: #3a2740;
+  box-shadow: inset 0 0 0 2px #5a3f66, 0 3px 0 #1a1020;
+  color: #f5d442;
+  padding: 0 6px;
+}
+
+#sd .b.on {
+  background: #4b3358;
+  box-shadow: inset 0 0 0 2px #f5c542, 0 3px 0 #1a1020;
 }
