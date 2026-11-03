@@ -1,83 +1,94 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8">
-  <title>Little Acres 🌱</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta charset="utf-8">
+    <title>Little Acres</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
-  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
-
-  <script src="js/data.js" defer></script>
-  <script src="js/state.js" defer></script>
-  <script src="js/farm.js" defer></script>
-  <script src="js/scene.js" defer></script>
-  <script src="js/ui.js" defer></script>
-  <script src="js/main.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
+    <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
-  <div id="w">
-    <div id="hud">
-      <button class="b s" id="nv"></button>
-      <span id="co"></span>
-      <span id="nx"></span>
-      <span id="iv"></span>
-      <button class="b s" id="sell">Bán hết</button>
+    <div id="w">
+        <div id="hud">
+            <button class="b s" id="nv"></button>
+            <span id="co"></span>
+            <span id="nx"></span>
+            <span id="iv"></span>
+            <button class="b s" id="sell">Kho</button>
+        </div>
+
+        <div id="cw">
+            <canvas id="cv" width="320" height="160"></canvas>
+            <div id="pz">TẠM DỪNG</div>
+        </div>
+
+        <div id="pn">
+            <div class="row" id="tools"></div>
+
+            <div class="row">
+                <span>Hạt:</span>
+                <span class="row" id="sd" style="margin:0"></span>
+            </div>
+
+            <div class="row">
+                <span>Vật nuôi:</span>
+                <span class="row" id="an" style="margin:0"></span>
+            </div>
+
+            <div class="row">
+                <span>Thuê:</span>
+                <span class="row" id="st" style="margin:0"></span>
+            </div>
+
+            <div class="row">
+                <button class="b s" id="bp">Tạm dừng</button>
+                <button class="b s" id="bb">Sao lưu</button>
+                <button class="b s" id="br">Chơi lại</button>
+            </div>
+        </div>
+
+        <div id="ts"></div>
     </div>
 
-    <div id="cw">
-      <canvas id="cv" width="320" height="160"></canvas>
-      <div id="pz">TẠM DỪNG</div>
+    <div id="kp">
+        <div>
+            <h4 id="kh"></h4>
+            <div id="kr"></div>
+            <div class="row">
+                <button class="b s" id="ks">Bán tất cả</button>
+                <button class="b s" id="ku"></button>
+                <button class="b s" id="kx">Đóng</button>
+            </div>
+        </div>
     </div>
 
-    <div id="pn">
-      <div class="row" id="tools"></div>
-
-      <div class="row">
-        <span>Hạt:</span>
-        <span class="row" id="sd" style="margin:0"></span>
-      </div>
-
-      <div class="row">
-        <span>Vật nuôi:</span>
-        <span class="row" id="an" style="margin:0"></span>
-      </div>
-
-      <div class="row">
-        <span>Thuê:</span>
-        <span class="row" id="st" style="margin:0"></span>
-      </div>
-
-      <div class="row">
-        <button class="b s" id="bp">Tạm dừng</button>
-        <button class="b s" id="bb">Sao lưu</button>
-        <button class="b s" id="br">Chơi lại</button>
-      </div>
+    <div id="zp">
+        <div>
+            <h4>Chọn khu vực</h4>
+            <div id="zl"></div>
+            <button class="b s" id="zx">Đóng</button>
+        </div>
     </div>
 
-    <div id="ts"></div>
-  </div>
-
-  <div id="zp">
-    <div>
-      <h4>Chọn khu vực</h4>
-      <div id="zl"></div>
-      <button class="b s" id="zx">Đóng</button>
+    <div id="md">
+        <div>
+            <h4>Mã sao lưu</h4>
+            <textarea id="bk"></textarea>
+            <div class="row">
+                <button class="b s" id="mc">Sao chép</button>
+                <button class="b s" id="mr">Khôi phục</button>
+                <button class="b s" id="mx">Đóng</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <div id="md">
-    <div>
-      <h4>Mã sao lưu</h4>
-      <textarea id="bk"></textarea>
-      <div class="row">
-        <button class="b s" id="mc">Sao chép</button>
-        <button class="b s" id="mr">Khôi phục</button>
-        <button class="b s" id="mx">Đóng</button>
-      </div>
-    </div>
-  </div>
+    <script src="js/data.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/farm.js"></script>
+    <script src="js/scene.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
