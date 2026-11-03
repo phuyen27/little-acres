@@ -163,6 +163,11 @@ function act(mx, my) {
                 } else {
                     toast('Không đủ xu mua thức ăn', 1);
                 }
+            } else if (a.g < A.t * 2) {
+                toast(
+                    A.n + ' con đang lớn ' +
+                    Math.floor(a.g / (A.t * 2) * 100) + '%'
+                );
             }
 
             return;
