@@ -1,5 +1,4 @@
-
-/* ===== SPRITE FUNCTIONS ===== */
+/* ===== SPRITE DRAWING ===== */
 
 function spr(g, rows, pal, x, y, fl, sw) {
   x = Math.round(x);
@@ -12,6 +11,7 @@ function spr(g, rows, pal, x, y, fl, sw) {
       if (ch === '.') continue;
 
       g.fillStyle = pal[ch] || '#f0f';
+
       g.fillRect(
         x + (fl ? r.length - 1 - i : i) + (sw && j < sw ? 1 : 0),
         y + j,
@@ -24,6 +24,7 @@ function spr(g, rows, pal, x, y, fl, sw) {
 
 function cropPal(k) {
   const o = CROPS[k];
+
   return Object.assign({}, PAL, {
     f: o.f,
     F: o.F
@@ -43,7 +44,7 @@ function cropRows(k, p) {
         : ST[2];
 }
 
-/* ===== NOTIFICATIONS & MONEY ===== */
+/* ===== NOTIFICATIONS ===== */
 
 function toast(m, bad) {
   const e = document.createElement('div');
@@ -60,17 +61,22 @@ function toast(m, bad) {
   setTimeout(() => e.remove(), 2500);
 }
 
+/* ===== LAND EXPANSION ===== */
+
 function nextCost() {
   const n = u.filter(Boolean).length;
+
   return Math.round(60 * Math.pow(1.22, n - 12));
 }
+
+/* ===== SELL PRODUCTS ===== */
 
 function sellAll() {
   let t = 0;
 
   for (const k in inv) {
     t += inv[k] * (
-      k[0] === 'c'
+      k[0] == 'c'
         ? CROPS[+k.slice(1)].s
         : ANI[+k.slice(1)].s
     );
@@ -88,6 +94,8 @@ function sellAll() {
   toast('Đã bán được ' + t + ' xu');
 }
 
+/* ===== INVENTORY VALUE ===== */
+
 function invVal() {
   let t = 0;
   let n = 0;
@@ -96,7 +104,7 @@ function invVal() {
     n += inv[k];
 
     t += inv[k] * (
-      k[0] === 'c'
+      k[0] == 'c'
         ? CROPS[+k.slice(1)].s
         : ANI[+k.slice(1)].s
     );
@@ -108,6 +116,8 @@ function invVal() {
 /* ===== FARM INTERACTION ===== */
 
 function act(mx, my) {
+  /* Interact with animals */
+
   for (const a of animals) {
     const A = ANI[a.t];
 
@@ -120,6 +130,7 @@ function act(mx, my) {
       if (a.p >= A.t) {
         inv['a' + a.t] = (inv['a' + a.t] || 0) + 1;
         a.p = 0;
+
         toast('Thu được ' + A.r + ' từ ' + A.n);
       }
 
@@ -127,6 +138,7 @@ function act(mx, my) {
         if (coins >= FEED) {
           coins -= FEED;
           a.f = 100;
+
           toast('Đã cho ' + A.n + ' ăn');
         } else {
           toast('Không đủ xu mua thức ăn', 1);
@@ -137,13 +149,19 @@ function act(mx, my) {
     }
   }
 
+  /* Find selected plot */
+
   const cl = Math.floor((mx - FX) / 16);
   const rw = Math.floor((my - FY) / 16);
 
-  if (cl < 0 || cl >= COLS || rw < 0 || rw >= ROWS) return;
+  if (cl < 0 || cl >= COLS || rw < 0 || rw >= ROWS) {
+    return;
+  }
 
   const i = rw * 8 + cl;
   const p = plots[i];
+
+  /* Unlock land */
 
   if (!u[i]) {
     const k = nextCost();
@@ -151,6 +169,7 @@ function act(mx, my) {
     if (coins >= k) {
       coins -= k;
       u[i] = true;
+
       toast('Đã mở thêm một ô đất');
     } else {
       toast('Ô đất này giá ' + k + ' xu', 1);
@@ -159,16 +178,23 @@ function act(mx, my) {
     return;
   }
 
-  if (tool === 0) {
+  /* Hoe */
+
+  if (tool == 0) {
     if (!p.t && p.c < 0) {
       p.t = 1;
     }
-  } else if (tool === 1) {
+  }
+
+  /* Plant seeds */
+
+  else if (tool == 1) {
     if (p.t && p.c < 0) {
       const o = CROPS[sel];
 
       if (coins >= o.p) {
         coins -= o.p;
+
         p.c = sel;
         p.g = 0;
         p.w = 0;
@@ -176,9 +202,19 @@ function act(mx, my) {
         toast('Không đủ xu mua hạt ' + o.n.toLowerCase(), 1);
       }
     }
-  } else if (tool === 2) {
-    if (p.c >= 0) p.w = 45;
-  } else if (tool === 3) {
+  }
+
+  /* Water crops */
+
+  else if (tool == 2) {
+    if (p.c >= 0) {
+      p.w = 45;
+    }
+  }
+
+  /* Harvest */
+
+  else if (tool == 3) {
     if (p.c >= 0 && p.g >= CROPS[p.c].t) {
       inv['c' + p.c] = (inv['c' + p.c] || 0) + 1;
 
@@ -190,6 +226,8 @@ function act(mx, my) {
     }
   }
 }
+
+/* ===== CANVAS INPUT ===== */
 
 cv.addEventListener('pointerdown', e => {
   const r = cv.getBoundingClientRect();
@@ -206,6 +244,8 @@ function update(dt) {
   tm += dt;
   wt -= dt;
 
+  /* Weather */
+
   if (wt <= 0) {
     weather = Math.random() < .3 ? 1 : 0;
     wt = 40 + Math.random() * 50;
@@ -218,9 +258,13 @@ function update(dt) {
     );
   }
 
+  /* Grow crops */
+
   for (const p of plots) {
     if (p.c >= 0) {
-      if (weather) p.w = Math.max(p.w, 10);
+      if (weather) {
+        p.w = Math.max(p.w, 10);
+      }
 
       if (p.w > 0) {
         p.w -= dt;
@@ -232,10 +276,11 @@ function update(dt) {
     }
   }
 
-  /* Animal update */
+  /* Update animals */
 
   for (const a of animals) {
     const A = ANI[a.t];
+
     const was = a.f > 0;
 
     a.f = Math.max(0, a.f - dt);
@@ -261,11 +306,13 @@ function update(dt) {
 
       if (d < 2) {
         a.wait = 1 + Math.random() * 4;
+
         a.tx = PX0 + Math.random() * (PX1 - PX0 - A.w);
         a.ty = PY0 + Math.random() * (PY1 - PY0);
       } else {
         a.x += dx / d * sp * dt;
         a.y += dy / d * sp * dt;
+
         a.mv = 1;
 
         if (Math.abs(dx) > 1) {
@@ -275,7 +322,7 @@ function update(dt) {
     }
   }
 
-  /* Floating money */
+  /* Floating coins */
 
   fT += dt;
 
